@@ -10,17 +10,8 @@ num_classes = 11
 epochs = 50
 
 
-def train_model():
-    train_ds, val_ds = keras.utils.image_dataset_from_directory(
-        "dataset",
-        validation_split=0.2,
-        subset="both",
-        seed=75317531,
-        image_size=image_size,
-        batch_size=batch_size,
-    )
-
-    model = keras.Sequential(
+def create_model(hp):
+    return keras.Sequential(
         [
             layers.Input(shape=(*image_size, 3)),                      # (input)
             layers.RandomFlip("horizontal"),                           # (preprocessing) Randomly flip them
@@ -42,6 +33,19 @@ def train_model():
             layers.Dense(num_classes, activation="softmax"),           # fully connected layer followed by softmax
         ]
     )
+
+
+def train_model():
+    train_ds, val_ds = keras.utils.image_dataset_from_directory(
+        "dataset",
+        validation_split=0.2,
+        subset="both",
+        seed=75317531,
+        image_size=image_size,
+        batch_size=batch_size,
+    )
+
+    model = create_model(None)
 
     print(model.summary())
 
