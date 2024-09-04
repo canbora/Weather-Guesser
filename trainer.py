@@ -60,11 +60,10 @@ def train_model():
     )
 
     # First, tune the hyperparameters
-    tuner = keras_tuner.RandomSearch(
+    tuner = keras_tuner.Hyperband(
         hypermodel=create_model,
         objective="val_loss",
-        max_trials=15,
-        executions_per_trial=1,
+        max_epochs=9,
         overwrite=True,
         directory="hypertuning",
         project_name="weather",
