@@ -16,6 +16,7 @@ def predict(filename=None, model=None):
     print("Possibilities for each category:")
     for result, category in category_results:
         print(f"{category}: {result:.3f}")
+    return category_results
 
 
 if __name__ == '__main__':
