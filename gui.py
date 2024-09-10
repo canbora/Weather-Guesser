@@ -10,19 +10,23 @@ class ResultsFrame(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
 
-        self.label_image = ttk.Label(self, font=("Cambria", 12))
-        self.label_image.pack(side=tk.LEFT, padx=20, pady=20, expand=True)
+        self.frame_image = ttk.Frame(self, width=250, height=250)
+        self.frame_image.pack_propagate(0)
+        self.frame_image.pack(side=tk.LEFT, padx=20, pady=20)
+        self.label_image = ttk.Label(self.frame_image)
+        self.label_image.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
-        self.table_results = ttk.Treeview(self, show="", columns=("category", "probability"), height=11)
+        self.table_results = ttk.Treeview(self, show="headings", columns=("category", "probability"), height=11)
+        self.table_results.column("category", width=100)
+        self.table_results.column("probability", width=100)
         self.table_results.heading("category", text="Weather")
         self.table_results.heading("probability", text="Probability")
-        self.table_results.pack(side=tk.LEFT, padx=20, pady=20, expand=True)
+        self.table_results.pack(side=tk.RIGHT, padx=20, pady=20)
 
     def update(self, image_filename, results):
         image = Image.open(image_filename)
         image.thumbnail((250, 250))
         self.tk_image = ImageTk.PhotoImage(image)
-        self.table_results.config(show="headings")
         self.table_results.delete(*self.table_results.get_children())
         for (result, category) in results:
             self.table_results.insert("", "end", values=(category, f"{result:.3f}"))
