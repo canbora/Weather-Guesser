@@ -5,6 +5,22 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 from predict import predict
 
+class ButtonsFrame(ttk.Frame):
+
+    def __init__(self, parent, button_infos):
+        super().__init__(parent)
+        self.buttons = []
+
+        for (name, func) in button_infos:
+            button = ttk.Button(self, text=name, padding=10)
+            def callback():
+                button.state(["disabled"])
+                func()
+                button.state(["!disabled"])
+            button.config(command=callback)
+            self.buttons.append(button)
+            button.pack(side=tk.LEFT, padx=10, pady=10)
+
 class ResultsFrame(ttk.Frame):
 
     def __init__(self, parent):
@@ -47,9 +63,10 @@ class Window(tk.Tk):
         offset_y = (self.winfo_screenheight()-height)//2
         self.geometry(f"{width}x{height}+{offset_x}+{offset_y}")
 
-        # Widgets
-        self.button_load_image = ttk.Button(self, text="Test an Image", command=self.load_image, padding=10)
-        self.button_load_image.pack(padx=10, pady=10)
+        # Top buttons
+        buttons = [("Test an Image", self.load_image)]
+        self.buttons_frame = ButtonsFrame(self, buttons)
+        self.buttons_frame.pack(padx=10, pady=10)
 
         self.results_frame = ResultsFrame(self)
         self.results_frame.pack()
