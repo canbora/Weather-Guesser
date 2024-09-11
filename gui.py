@@ -4,6 +4,7 @@ import tkinter.filedialog as filedialog
 from tkinter import ttk
 from PIL import Image, ImageTk
 from predict import predict
+from trainer import train_model
 
 class ButtonsFrame(ttk.Frame):
 
@@ -13,7 +14,7 @@ class ButtonsFrame(ttk.Frame):
 
         for (name, func) in button_infos:
             button = ttk.Button(self, text=name, padding=10)
-            def callback():
+            def callback(button=button, func=func):
                 button.state(["disabled"])
                 func()
                 button.state(["!disabled"])
@@ -64,7 +65,7 @@ class Window(tk.Tk):
         self.geometry(f"{width}x{height}+{offset_x}+{offset_y}")
 
         # Top buttons
-        buttons = [("Test an Image", self.load_image)]
+        buttons = [("Test an Image", self.load_image), ("Retrain the model", train_model)]
         self.buttons_frame = ButtonsFrame(self, buttons)
         self.buttons_frame.pack(padx=10, pady=10)
 
