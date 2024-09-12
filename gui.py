@@ -5,6 +5,7 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 from predict import predict
 from trainer import train_model
+import threading
 
 class ButtonsFrame(ttk.Frame):
 
@@ -15,9 +16,12 @@ class ButtonsFrame(ttk.Frame):
         for (name, func) in button_infos:
             button = ttk.Button(self, text=name, padding=10)
             def callback(button=button, func=func):
-                button.state(["disabled"])
-                func()
-                button.state(["!disabled"])
+                def altered_func():
+                    button.state(["disabled"])
+                    func()
+                    button.state(["!disabled"])
+                thread = threading.Thread(target=altered_func)
+                thread.start()
             button.config(command=callback)
             self.buttons.append(button)
             button.pack(side=tk.LEFT, padx=10, pady=10)
@@ -57,13 +61,6 @@ class Window(tk.Tk):
         super().__init__()
         self.title("Weather Guesser")
 
-        ## Center window
-        width = 540
-        height = 360
-        offset_x = (self.winfo_screenwidth()-width)//2
-        offset_y = (self.winfo_screenheight()-height)//2
-        self.geometry(f"{width}x{height}+{offset_x}+{offset_y}")
-
         # Top buttons
         buttons = [("Test an Image", self.load_image), ("Retrain the model", train_model)]
         self.buttons_frame = ButtonsFrame(self, buttons)
@@ -71,6 +68,14 @@ class Window(tk.Tk):
 
         self.results_frame = ResultsFrame(self)
         self.results_frame.pack()
+
+        ## Center window
+        self.update()
+        width = self.winfo_width()
+        height = self.winfo_height()
+        offset_x = (self.winfo_screenwidth()-width)//2
+        offset_y = (self.winfo_screenheight()-height)//2
+        self.geometry(f"{width}x{height}+{offset_x}+{offset_y}")
 
     def load_image(self):
         image_filename = filedialog.askopenfilename(multiple=False)
