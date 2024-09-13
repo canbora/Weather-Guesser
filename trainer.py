@@ -93,6 +93,8 @@ def train_model(tune_again=False):
 
         print(model.summary())
 
+        model.save("tuned_model.keras", overwrite=True)
+
     # now train it
 
     callbacks = [
