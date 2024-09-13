@@ -6,7 +6,7 @@ import numpy as np
 def predict(filename=None, model=None):
 
     if model is None:
-        model = keras.saving.load_model("model.keras")
+        model = keras.saving.load_model("trained_model.keras")
     if filename is None:
         filename = input("Enter file path: ")
     imdata = get_single_image_data(filename, 124)[np.newaxis]

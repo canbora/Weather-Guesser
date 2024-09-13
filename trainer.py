@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from keras import layers
 import keras_tuner
+import os.path
 
 image_size = (124, 124)
 batch_size = 128
@@ -49,41 +50,53 @@ def create_model(hp):
     return model
 
 
-def train_model():
-    train_ds, val_ds = keras.utils.image_dataset_from_directory(
-        "dataset",
-        validation_split=0.2,
-        subset="both",
-        seed=75317531,
-        image_size=image_size,
-        batch_size=batch_size,
-    )
+def train_model(tune_again=False):
 
-    # First, tune the hyperparameters
-    tuner = keras_tuner.Hyperband(
-        hypermodel=create_model,
-        objective="val_loss",
-        max_epochs=9,
-        overwrite=True,
-        directory="hypertuning",
-        project_name="weather",
-    )
-    print(tuner.search_space_summary())
+    model = None
+    if not tune_again:
+        try:
+            model = keras.saving.load_model("tuned_model.keras")
+        except ValueError: # no tuned model file
+            pass
 
-    tuner.search(
-        train_ds,
-        epochs=1,
-        validation_data=val_ds,
-        verbose=2
-    )
+    if model is None: # Need to tune model first
 
-    # Recreate the model with the best hyperparameters
-    model = create_model(tuner.get_best_hyperparameters(1)[0])
+        train_ds, val_ds = keras.utils.image_dataset_from_directory(
+            "dataset",
+            validation_split=0.2,
+            subset="both",
+            seed=75317531,
+            image_size=image_size,
+            batch_size=batch_size,
+        )
 
-    print(model.summary())
+        # First, tune the hyperparameters
+        tuner = keras_tuner.Hyperband(
+            hypermodel=create_model,
+            objective="val_loss",
+            max_epochs=9,
+            overwrite=True,
+            directory="hypertuning",
+            project_name="weather",
+        )
+        print(tuner.search_space_summary())
+
+        tuner.search(
+            train_ds,
+            epochs=1,
+            validation_data=val_ds,
+            verbose=2
+        )
+
+        # Recreate the model with the best hyperparameters
+        model = create_model(tuner.get_best_hyperparameters(1)[0])
+
+        print(model.summary())
+
+    # now train it
 
     callbacks = [
-        keras.callbacks.ModelCheckpoint("model.keras", save_best_only=True, verbose=1),
+        keras.callbacks.ModelCheckpoint("trained_model.keras", save_best_only=True, verbose=1),
     ]
 
     model.fit(
