@@ -9,4 +9,5 @@ I am currently preparing this project as part of my internship at Turkcell Commu
 ## Running
 
 - Download the dataset from [Kaggle](https://www.kaggle.com/datasets/jehanbhathena/weather-dataset/data). Put the eleven weather folders in the dataset folder.
-- To generate images.npz, which holds normalized image data, run `imageresizer.py`.
+- Run gui.py. If this is the first time you are running the program, click "Tune and train model" to train the model with the dataset. It should take about 30 minutes.
+- Check the weather of your own photo with the "Test an image" button
