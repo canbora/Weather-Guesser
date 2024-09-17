@@ -52,6 +52,15 @@ def create_model(hp):
 
 def train_model(tune_again=False):
 
+    train_ds, val_ds = keras.utils.image_dataset_from_directory(
+        "dataset",
+        validation_split=0.2,
+        subset="both",
+        seed=75317531,
+        image_size=image_size,
+        batch_size=batch_size,
+    )
+
     model = None
     if not tune_again:
         try:
@@ -60,15 +69,6 @@ def train_model(tune_again=False):
             pass
 
     if model is None: # Need to tune model first
-
-        train_ds, val_ds = keras.utils.image_dataset_from_directory(
-            "dataset",
-            validation_split=0.2,
-            subset="both",
-            seed=75317531,
-            image_size=image_size,
-            batch_size=batch_size,
-        )
 
         # First, tune the hyperparameters
         tuner = keras_tuner.Hyperband(
