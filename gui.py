@@ -62,7 +62,11 @@ class Window(tk.Tk):
         self.title("Weather Guesser")
 
         # Top buttons
-        buttons = [("Test an Image", self.load_image), ("Retrain the model", train_model)]
+        buttons = [
+            ("Test an Image", self.load_image),
+            ("Tune and train model", lambda: train_model(tune_again=True)),
+            ("Retrain model with current hyperparams", lambda: train_model(tune_again=False))
+        ]
         self.buttons_frame = ButtonsFrame(self, buttons)
         self.buttons_frame.pack(padx=10, pady=10)
 
