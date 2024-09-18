@@ -9,12 +9,13 @@ import threading
 
 class ButtonsFrame(ttk.Frame):
 
-    def __init__(self, parent, button_infos):
+    def __init__(self, parent, button_infos, lang="TR"):
         super().__init__(parent)
         self.buttons = []
+        self.button_infos = button_infos
 
-        for (name, func) in button_infos:
-            button = ttk.Button(self, text=name, padding=10)
+        for (names, func) in button_infos:
+            button = ttk.Button(self, text=names[lang], padding=10)
             def callback(button=button, func=func):
                 def altered_func():
                     button.state(["disabled"])
@@ -22,9 +23,15 @@ class ButtonsFrame(ttk.Frame):
                     button.state(["!disabled"])
                 thread = threading.Thread(target=altered_func)
                 thread.start()
-            button.config(command=callback)
+            button["command"] = callback
             self.buttons.append(button)
             button.pack(side=tk.LEFT, padx=10, pady=10)
+
+    def change_lang(self, lang):
+        self.lang = lang
+        for i, info in enumerate(self.button_infos):
+            self.buttons[i]["text"] = info[0][lang]
+
 
 class ResultsFrame(ttk.Frame):
 
@@ -54,6 +61,7 @@ class ResultsFrame(ttk.Frame):
         self.label_image.config(image=self.tk_image)
 
 
+
 class Window(tk.Tk):
 
     def __init__(self):
@@ -61,13 +69,18 @@ class Window(tk.Tk):
         super().__init__()
         self.title("Weather Guesser")
 
-        # Top buttons
-        buttons = [
-            ("Test an Image", self.load_image),
-            ("Tune and train model", lambda: train_model(tune_again=True)),
-            ("Retrain model with current hyperparams", lambda: train_model(tune_again=False))
+        self.lang = "TR"
+
+        self.invert_lang = {"TR": "EN", "EN": "TR"}
+
+        self.buttons = [
+            [{"TR": "English", "EN": "Türkçe"}, self.change_lang],
+            [{"TR": "Resim yükle", "EN": "Test an Image"}, self.load_image],
+            [{"TR": "Modeli eğit ve ayarla", "EN": "Tune and train model"}, lambda: train_model(tune_again=True)],
+            [{"TR": "Modeli eğit", "EN": "Train model"}, lambda: train_model(tune_again=False)]
         ]
-        self.buttons_frame = ButtonsFrame(self, buttons)
+        
+        self.buttons_frame = ButtonsFrame(self, self.buttons)
         self.buttons_frame.pack(padx=10, pady=10)
 
         self.results_frame = ResultsFrame(self)
@@ -85,6 +98,11 @@ class Window(tk.Tk):
         image_filename = filedialog.askopenfilename(multiple=False)
         results = predict(image_filename)
         self.results_frame.update(image_filename, results)
+
+    def change_lang(self):
+        self.lang = self.invert_lang[self.lang]
+        self.buttons_frame.change_lang(self.lang)
+
 
 
 window = Window()
