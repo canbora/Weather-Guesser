@@ -35,8 +35,41 @@ class ButtonsFrame(ttk.Frame):
 
 class ResultsFrame(ttk.Frame):
 
-    def __init__(self, parent):
+    labels = {
+        "EN": {
+            "dew": "Dew",
+            "fogsmog": "Fog/smog",
+            "frost": "Frost",
+            "glaze": "Glaze",
+            "hail": "Hail",
+            "lightning": "Lightning",
+            "rain": "Rain",
+            "rainbow": "Rainbow",
+            "rime": "Rime",
+            "sandstorm": "Sandstorm",
+            "snow": "Snow",
+            "category": "Weather",
+            "probability": "Probability"
+        }, "TR": {
+            "dew": "Çiy",
+            "fogsmog": "Sis/pus",
+            "frost": "Kırağı",
+            "glaze": "Buzlu",
+            "hail": "Dolu",
+            "lightning": "Şimşek",
+            "rain": "Yağmur",
+            "rainbow": "Gökkuşağı",
+            "rime": "Don",
+            "sandstorm": "Kum fırtınası",
+            "snow": "Kar",
+            "category": "Hava Durumu",
+            "probability": "İhtimal"
+        }
+    }
+
+    def __init__(self, parent, lang="TR"):
         super().__init__(parent)
+        self.lang = lang
 
         self.frame_image = ttk.Frame(self, width=250, height=250)
         self.frame_image.pack_propagate(0)
@@ -47,18 +80,28 @@ class ResultsFrame(ttk.Frame):
         self.table_results = ttk.Treeview(self, show="headings", columns=("category", "probability"), height=11)
         self.table_results.column("category", width=100)
         self.table_results.column("probability", width=100)
-        self.table_results.heading("category", text="Weather")
-        self.table_results.heading("probability", text="Probability")
+        self.table_results.heading("category", text=self.labels[self.lang]["category"])
+        self.table_results.heading("probability", text=self.labels[self.lang]["probability"])
         self.table_results.pack(side=tk.RIGHT, padx=20, pady=20)
+        self.results = []
 
-    def update(self, image_filename, results):
-        image = Image.open(image_filename)
-        image.thumbnail((250, 250))
-        self.tk_image = ImageTk.PhotoImage(image)
+    def update(self, image_filename=None, results=None):
+        if image_filename is not None:
+            image = Image.open(image_filename)
+            image.thumbnail((250, 250))
+            self.tk_image = ImageTk.PhotoImage(image)
+            self.label_image.config(image=self.tk_image)
+        if results is not None:
+            self.results = results
         self.table_results.delete(*self.table_results.get_children())
-        for (result, category) in results:
-            self.table_results.insert("", "end", values=(category, f"{result:.3f}"))
-        self.label_image.config(image=self.tk_image)
+        for (result, category) in self.results:
+            self.table_results.insert("", "end", values=(self.labels[self.lang][category], f"{result:.3f}"))
+
+    def change_lang(self, lang):
+        self.lang = lang
+        self.table_results.heading("category", text=self.labels[self.lang]["category"])
+        self.table_results.heading("probability", text=self.labels[self.lang]["probability"])
+        self.update()
 
 
 
@@ -79,7 +122,7 @@ class Window(tk.Tk):
             [{"TR": "Modeli eğit ve ayarla", "EN": "Tune and train model"}, lambda: train_model(tune_again=True)],
             [{"TR": "Modeli eğit", "EN": "Train model"}, lambda: train_model(tune_again=False)]
         ]
-        
+
         self.buttons_frame = ButtonsFrame(self, self.buttons)
         self.buttons_frame.pack(padx=10, pady=10)
 
@@ -102,6 +145,7 @@ class Window(tk.Tk):
     def change_lang(self):
         self.lang = self.invert_lang[self.lang]
         self.buttons_frame.change_lang(self.lang)
+        self.results_frame.change_lang(self.lang)
 
 
 
