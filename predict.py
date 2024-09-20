@@ -10,7 +10,7 @@ def predict(filename=None, model=None):
     if filename is None:
         filename = input("Enter file path: ")
     imdata = get_single_image_data(filename, 124)[np.newaxis]
-    results = model(imdata)[0]
+    results = model(imdata, training=False)[0]
     category_results = list(zip(results, weather_types))
     category_results.sort(reverse=True)
     print("Possibilities for each category:")
